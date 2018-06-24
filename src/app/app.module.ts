@@ -1,14 +1,23 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
+import { ObservableComponent } from './observable/observable.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    ObservableComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    RouterModule.forRoot([
+      {
+        path: 'observable',
+        component: ObservableComponent
+      }
+    ])
   ],
   providers: [],
   bootstrap: [AppComponent]
