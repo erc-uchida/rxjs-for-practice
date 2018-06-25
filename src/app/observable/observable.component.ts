@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-observable',
@@ -13,17 +14,24 @@ export class ObservableComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.createObservableObj().subscribe({
-      next: (value) => {
-        this.prop = value;
-      },
-      error: (err) => {
-        console.log(err);
-      },
-      complete: () => {
-        console.log('observable complete');
-      }
-    });
+    this.createObservableObj()
+      .pipe(
+        map(value => value * 2),
+        filter(value => value > 4)
+      )
+      .subscribe({
+          next: (value) => {
+            console.log('observable next', value);
+            this.prop = value;
+          },
+          error: (err) => {
+            console.log(err);
+          },
+          complete: () => {
+            console.log('observable complete');
+          }
+        }
+      );
   }
 
   createObservableObj(): Observable<number> {
