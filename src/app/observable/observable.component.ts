@@ -50,4 +50,21 @@ export class ObservableComponent implements OnInit {
 
     });
   }
+
+  generateUnlimitedStream(): void {
+    Observable.create((observer: Observer<number>) => {
+      let notifyValue = 0;
+
+      const intervalId = setInterval(() => {
+        observer.next(notifyValue);
+        notifyValue++;
+
+        // ブラウザが固まらないように制限を入れています
+        if (notifyValue > 100) {
+          clearInterval(intervalId);
+        }
+      }, 1000);
+
+    }).subscribe(val => console.log('unlimited stream', val));
+  }
 }
