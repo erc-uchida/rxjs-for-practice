@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, Observer } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { from, Observable, Observer } from 'rxjs';
+import { concatMap, filter, finalize, map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-observable',
@@ -70,5 +70,64 @@ export class ObservableComponent implements OnInit {
     setTimeout(() => {
       sub.unsubscribe();
     }, 1500);
+  }
+
+  onClick(): void {
+    from([
+      this.proc1(),
+      this.proc2(),
+      this.procNull(),
+      this.proc3()
+    ]).pipe(
+      filter(val => {
+        console.log('filter');
+        return val !== null;
+      }),
+      tap(val => {
+        console.log('tap');
+        return val;
+      }),
+      concatMap(val => {
+        console.log('concatMap');
+        return val;
+      }),
+      finalize(() => {
+        console.log('finalize');
+      })
+    ).subscribe();
+  }
+
+  private proc1(): Observable<null> {
+    return Observable.create((o: Observer<null>) => {
+      setTimeout(() => {
+        // なんか処理する...
+        console.log('proc1 complete');
+        o.complete();
+      }, 5000);
+    });
+  }
+
+  private proc2(): Observable<null> {
+    return Observable.create((o: Observer<null>) => {
+      setTimeout(() => {
+        // なんか処理する...
+        console.log('proc2 complete');
+        o.complete();
+      }, 1000);
+    });
+  }
+
+  private proc3(): Observable<null> {
+    return Observable.create((o: Observer<null>) => {
+      setTimeout(() => {
+        // なんか処理する...
+        console.log('proc3 complete');
+        o.complete();
+      }, 3000);
+    });
+  }
+
+  private procNull(): Observable<null> | null {
+    return null;
   }
 }
