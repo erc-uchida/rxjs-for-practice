@@ -52,7 +52,7 @@ export class ObservableComponent implements OnInit {
   }
 
   generateUnlimitedStream(): void {
-    Observable.create((observer: Observer<number>) => {
+    const observable: Observable<number> = Observable.create((observer: Observer<number>) => {
       let notifyValue = 0;
 
       const intervalId = setInterval(() => {
@@ -64,7 +64,11 @@ export class ObservableComponent implements OnInit {
           clearInterval(intervalId);
         }
       }, 1000);
+    });
 
-    }).subscribe(val => console.log('unlimited stream', val));
+    const sub = observable.subscribe(val => console.log('unlimited stream', val));
+    setTimeout(() => {
+      sub.unsubscribe();
+    }, 1500);
   }
 }
