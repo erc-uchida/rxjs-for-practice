@@ -13,8 +13,16 @@ export class ObservableComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.createObservableObj().subscribe(value => {
-      this.prop = value;
+    this.createObservableObj().subscribe({
+      next: (value) => {
+        this.prop = value;
+      },
+      error: (err) => {
+        console.log(err);
+      },
+      complete: () => {
+        console.log('observable complete');
+      }
     });
   }
 
