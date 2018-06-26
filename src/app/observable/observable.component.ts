@@ -182,4 +182,56 @@ export class ObservableComponent implements OnInit {
       throw new Error('happened on procError1');
     });
   }
+
+  handleUnexpectedError2(): void {
+    from([
+      this.procNestedObservable()
+    ]).pipe(
+      concatMap(val => {
+        console.log('@@@ concatMap');
+        return val;
+      }),
+      catchError(err => {
+        console.log('@@@ catchError');
+        return throwError(err);
+      })
+    ).subscribe({
+      next: (val) => {
+        console.log('@@@ subscribe next', val);
+      },
+      error: (err) => {
+        console.log('@@@ subscribe error', err);
+      },
+      complete: () => {
+        console.log('@@@ subscribe complete');
+      }
+    });
+  }
+
+  private procNestedObservable(): Observable<null> {
+    return Observable.create((o: Observer<null>) => {
+
+      from([
+        this.procError1()
+      ]).pipe(
+        concatMap(val => {
+          console.log('@@@ nested concatMap');
+          return val;
+        }),
+        catchError(err => {
+          console.log('@@@ nested catchError');
+          return throwError(err);
+        })
+      ).subscribe({
+        next: (val) => {
+          console.log('@@@ nested subscribe next', val);
+        },
+        complete: () => {
+          console.log('@@@ nested subscribe complete');
+          o.complete();
+        }
+      });
+
+    });
+  }
 }
