@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { from, Observable, Observer } from 'rxjs';
-import { concatMap, filter, finalize, map, tap } from 'rxjs/operators';
+import { from, Observable, Observer, throwError } from 'rxjs';
+import { catchError, concatMap, filter, finalize, map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-observable',
@@ -129,5 +129,55 @@ export class ObservableComponent implements OnInit {
 
   private procNull(): Observable<null> | null {
     return null;
+  }
+
+  handleUnexpectedError(): void {
+    from([
+      this.procSuccess1(),
+      this.procError1(),
+      this.procSuccess2()
+    ]).pipe(
+      concatMap(val => {
+        console.log('@@@ concatMap');
+        return val;
+      }),
+      catchError(err => {
+        console.log('@@@ catchError');
+        return throwError(err);
+      })
+    ).subscribe({
+      next: (val) => {
+        console.log('@@@ subscribe next', val);
+      },
+      error: (err) => {
+        console.log('@@@ subscribe error', err);
+      },
+      complete: () => {
+        console.log('@@@ subscribe complete');
+      }
+    });
+  }
+
+  private procSuccess1(): Observable<null> {
+    return Observable.create((o: Observer<null>) => {
+      // 何か処理する....
+      console.log('@@@ proc success 1');
+      o.complete();
+    });
+  }
+
+  private procSuccess2(): Observable<null> {
+    return Observable.create((o: Observer<null>) => {
+      // 何か処理する....
+      console.log('@@@ proc success 2');
+      o.complete();
+    });
+  }
+
+  private procError1(): Observable<null> {
+    return Observable.create((o: Observer<null>) => {
+      // 何か処理する....
+      throw new Error('happened on procError1');
+    });
   }
 }
