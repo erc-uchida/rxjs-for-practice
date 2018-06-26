@@ -143,6 +143,7 @@ export class ObservableComponent implements OnInit {
       }),
       catchError(err => {
         console.log('@@@ catchError');
+        // throw err;
         return throwError(err);
       })
     ).subscribe({
@@ -151,6 +152,7 @@ export class ObservableComponent implements OnInit {
       },
       error: (err) => {
         console.log('@@@ subscribe error', err);
+        throw err;
       },
       complete: () => {
         console.log('@@@ subscribe complete');
