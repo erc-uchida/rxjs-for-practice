@@ -1,5 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { from, Observable, Observer, throwError } from 'rxjs';
+import { from, Observable, Observer, of, throwError } from 'rxjs';
 import { catchError, concatMap, filter, finalize, map, tap } from 'rxjs/operators';
 
 @Component({
@@ -11,7 +12,7 @@ export class ObservableComponent implements OnInit {
 
   prop: number;
 
-  constructor() { }
+  constructor(private httpClient: HttpClient) { }
 
   ngOnInit() {
     this.createObservableObj()
@@ -233,5 +234,62 @@ export class ObservableComponent implements OnInit {
       });
 
     });
+  }
+
+  handleUnexpectedError3(): void {
+    from([
+      this.procNestedObservable2()
+    ]).pipe(
+      concatMap(val => {
+        console.log('@@@ concatMap');
+        return val;
+      }),
+      catchError(err => {
+        console.log('@@@ catchError');
+        return throwError(err);
+      })
+    ).subscribe({
+      next: (val) => {
+        console.log('@@@ subscribe next', val);
+      },
+      error: (err) => {
+        console.log('@@@ subscribe error', err);
+      },
+      complete: () => {
+        console.log('@@@ subscribe complete');
+      }
+    });
+  }
+
+  private procNestedObservable2(): Observable<null> {
+    return Observable.create((o: Observer<null>) => {
+
+      from([
+        this.procApiRequest()
+      ]).pipe(
+        concatMap(val => {
+          console.log('@@@ nested concatMap');
+          return val;
+        }),
+        catchError(err => {
+          console.log('@@@ nested catchError');
+          return of(err);
+        })
+      ).subscribe({
+        next: (val) => {
+          console.log('@@@ nested subscribe next', val);
+        },
+        complete: () => {
+          console.log('@@@ nested subscribe complete');
+          o.complete();
+        }
+      });
+
+    });
+  }
+
+  private procApiRequest(): Observable<any> {
+    // もちろんローカルサーバーなどないのでエラーが発生します
+    return this.httpClient.get('http://localhost:4200/example');
   }
 }
